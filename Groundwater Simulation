@@ -1,1 +1,61 @@
 print("testing")
+import numpy as np
+import matplotlib.pyplot as plt
+from numba import jit
+
+def h_new(h, Node, delta, k, flux_x, flux_y, i, j):
+    if Node == 0:
+        # interior cell
+        h_n = (h[i+1,j] + h[i-1,j] + h[i,j-1] + h[i,j+1])/4
+    elif Node == 1:
+        # fixed value (Dirichlet)
+        h_n = h[i,j]
+    elif Node == 21:
+        # no flux left
+        h_n = (2*h[i+1,j] + h[i,j+1] + h[i,j-1])/4
+    elif Node == 22:
+        # no flux right
+        h_n = (2*h[i-1,j] + h[i,j+1] + h[i,j-1])/4
+    elif Node == 23:
+        # no flux bottom
+        h_n = (h[i+1,j] + h[i-1,j] + 2*h[i,j+1])/4
+    elif Node == 24:
+        # no flux top
+        h_n = (h[i+1,j] + h[i-1,j] + 2*h[i,j-1])/4
+    elif Node == 30:
+        # no flux corner, interior
+        h_n = (h[i-1,j] + h[i,j-1])/2
+    elif Node == 31:
+        # no flux corner, lower left outside
+        h_n = (h[i+1,j] + h[i,j+1])/2
+    elif Node == 32:
+        # no flux corner, upper left outside
+        h_n = (h[i+1,j] + h[i,j-1])/2
+    elif Node == 33:
+        #no flux corner, upper right outside
+        h_n = (h[i-1,j] + h[i,j-1])/2
+    elif Node == 34:
+        # no flux corner, lower right outside
+        h_n = (h[i-1,j] + h[i,j+1])/2
+    elif Node == 41:
+        # left/right change in k
+        h_avg = (k[i+1,j]*h[i+1,j] + k[i-1,j]*h[i-1,j]) / (k[i+1,j] + k[i-1,j])
+        h_n = (2*h_avg + h[i,j+1] + h[i,j-1])/4
+    elif Node == 42:
+        # top/bottom change in k
+        h_avg = (k[i,j+1]*h[i,j+1] + k[i,j-1]*h[i,j-1]) / (k[i,j+1] + k[i,j-1])
+        h_n = (2*h_avg + h[i+1,j] + h[i-1,j]) / 4
+    elif Node == 51:
+        # fixed flux from left to right
+        h_n = (2*h[i+1,j] + 2*delta*(-flux_x[i,j]/k[i,j]) + h[i,j+1] + h[i,j-1]) / 4
+    elif Node == 52:
+        # fixed flux from right to left
+        h_n = (2*h[i-1,j] + 2*delta*(-flux_x[i,j]/k[i,j]) + h[i,j+1] + h[i,j-1]) / 4
+    elif Node == 53:
+        # fixed flux from top to bottom
+        h_n = (h[i-1,j] + h[i+1,j] + 2*h[i,j-1] + 2*delta*(-flux_y[i,j]/k[i,j])) / 4
+    elif Node == 54:
+        h_n = (h[i-1,j] + h[i+1,j] + 2*h[i,j+1] + 2*delta*(-flux_y[i,j]/k[i,j])) / 4
+    else:
+        h_n = -99
+    return h_n

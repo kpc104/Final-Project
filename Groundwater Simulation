@@ -1,7 +1,10 @@
-print("testing")
+import math as m
 import numpy as np
 import matplotlib.pyplot as plt
 from numba import jit
+
+Nx = 72
+Ny = 42
 
 def h_new(h, Node, delta, k, flux_x, flux_y, i, j):
     if Node == 0:
@@ -59,3 +62,45 @@ def h_new(h, Node, delta, k, flux_x, flux_y, i, j):
     else:
         h_n = -99
     return h_n
+
+# delta is the length of each node
+# node coordinates start at 0, and Nx/Ny ranges are all +1
+
+k = np.ones((Nx, Ny))*10**-1
+k[9:11, 4] = 10**-5
+k[9:11, 5] = 10**-5
+#set new value for k in range where different
+
+# delta is the length of each node
+# node coordinates start at 0, and Nx/Ny ranges are all +1
+
+k = np.ones((Nx, Ny))*10**-1
+k[9:11, 4] = 10**-5
+k[9:11, 5] = 10**-5
+#set new value for k in range where different
+
+#flux as an array of 0
+flux_x = np.ones((Nx, Ny))
+flux_x[0,:] = 5
+
+flux_y = np.ones((Nx, Ny))
+flux_y[0,:] = 5
+#same for flux_y if on a top boundary
+
+@jit
+def FinDiff(h, Node, delta, tol):
+    err = tol + 1
+    iters = 0
+    lam = 1.8
+    Nx, Ny = np.shape(h)
+    while err > tol and iters < 10000:
+        err = 0
+        iters += 1
+        for j in range(Ny):
+            for i in range(Nx):
+                h_o = h[i,j]
+                h_n = h_new(h, Node[i,j], delta, k, flux_x[i,j], flux_y[i,j], i, j)
+                h_n = lam*h_n + (1-lam)*h_o
+                err = max(err, abs(h_n-h_o))
+                h[i,j] = h_n
+    return h, iters

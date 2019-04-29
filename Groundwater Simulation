@@ -192,6 +192,19 @@ def final(clay, black, lt_sand, drk_sand, shell, stone, md_sand, a, b, c, d, e, 
     N[46:65,1] = 1
     
     #no flux areas
+    N[21,22] = 32
+    N[22:26,22] = 24
+    N[26,22] = 33
+    N[21,21] = 31
+    N[22:26,21] = 23
+    N[26,21] = 34
+    
+    N[47,22] = 32
+    N[48:52,22] = 24
+    N[52,22] = 33
+    N[47,21] = 31
+    N[48:52,21] = 23
+    N[52,21] = 34
     
     h = np.ones_like(N, dtype='float')*5
     h[1,8] = a
@@ -229,4 +242,4 @@ def final(clay, black, lt_sand, drk_sand, shell, stone, md_sand, a, b, c, d, e, 
     plt.figure()
     plt.quiver(np.transpose(q_x[::1,::1]), np.transpose(q_y[::1,::1]))
 
-final(0.01,0.7,0.2,0.2,0.6,0.6,0.4,8,8,6,6,8,8,10,10,10,10,10,10,10,10)
+final(0.01,0.7,0.2,0.2,0.6,0.6,0.4,10,9,6,6,8,8,9,8,9,9,7,8,9,9)

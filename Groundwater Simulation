@@ -5,7 +5,7 @@ from numba import jit
 Nx = 73
 Ny = 42
 
-def final(clay, black, lt_sand, drk_sand, shell, stone, md_sand, a, b, c, A, B, C, D, E, F, G, H, d, e, f):
+def final(clay, black, lt_sand, drk_sand, shell, stone, md_sand, a, b, c, d, e, f, A, B, C, D, E, F, G, H):
     def h_new(h, Node, delta, k, flux_x, flux_y, i, j):
         if Node == 0:
             # interior cell
@@ -65,6 +65,7 @@ def final(clay, black, lt_sand, drk_sand, shell, stone, md_sand, a, b, c, A, B, 
 
     # delta is the length of each node
     # node coordinates start at 0, and Nx/Ny ranges are all +1
+    delta = 1
     
     k = np.ones((Nx, Ny))*drk_sand
     
@@ -228,4 +229,4 @@ def final(clay, black, lt_sand, drk_sand, shell, stone, md_sand, a, b, c, A, B, 
     plt.figure()
     plt.quiver(np.transpose(q_x[::1,::1]), np.transpose(q_y[::1,::1]))
 
-final(0.01,0.8,0.1,0.2,0.7,1,0.4,10,10,10,10,10,10,10,10,10,10,10,10,10,10)
+final(0.01,0.7,0.2,0.2,0.6,0.6,0.4,8,8,6,6,8,8,10,10,10,10,10,10,10,10)

@@ -5,7 +5,7 @@ from numba import jit
 Nx = 73
 Ny = 42
 
-def final(clay, black, lt_sand, drk_sand, shell, stone, md_sand, a, b, c, d, e, f, A, B, C, D, E, F, G, H):
+def Groundwater_Display(clay, black, lt_sand, drk_sand, shell, stone, md_sand, a, b, c, d, e, f, A, B, C, D, E, F, G, H):
     def h_new(h, Node, delta, k, flux_x, flux_y, i, j):
         if Node == 0:
             # interior cell
@@ -242,4 +242,4 @@ def final(clay, black, lt_sand, drk_sand, shell, stone, md_sand, a, b, c, d, e, 
     plt.figure()
     plt.quiver(np.transpose(q_x[::1,::1]), np.transpose(q_y[::1,::1]))
 
-final(0.01,0.7,0.2,0.2,0.6,0.6,0.4,10,9,6,6,8,8,9,8,9,9,7,8,9,9)
+Groundwater_Display(0.01,0.7,0.2,0.2,0.6,0.6,0.4,10,9,6,6,8,8,9,8,9,9,7,8,9,9)

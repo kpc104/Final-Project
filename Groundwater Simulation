@@ -40,7 +40,7 @@ def final(clay, black, lt_sand, drk_sand, shell, stone, md_sand, a, b, c, A, B, 
         elif Node == 34:
             # no flux corner, lower right outside
             h_n = (h[i-1,j] + h[i,j+1])/2
-        elif Node == 41:
+        elif Node == 49:
             # left/right change in k
             h_avg = (k[i+1,j]*h[i+1,j] + k[i-1,j]*h[i-1,j]) / (k[i+1,j] + k[i-1,j])
             h_n = (2*h_avg + h[i,j+1] + h[i,j-1])/4
@@ -82,7 +82,7 @@ def final(clay, black, lt_sand, drk_sand, shell, stone, md_sand, a, b, c, A, B, 
     k[27:33, 31:33] = lt_sand
     k[40:46, 31:33] = lt_sand #topright
     k[40:42, 30:31] = lt_sand
-    k[43:73, 31:36] = lt_sand 
+    k[43:73, 31:36] = lt_sand
     
     #black area
     k[33:40, 11:33] = black
@@ -102,6 +102,7 @@ def final(clay, black, lt_sand, drk_sand, shell, stone, md_sand, a, b, c, A, B, 
     k[30:43, 33:36] = md_sand
     k[40:73, 25:30] = md_sand
     k[42:73, 30:31] = md_sand
+    
     #clay pockets
     k[21:26,23:25] = clay
     k[47:52,23:25] = clay
@@ -137,6 +138,42 @@ def final(clay, black, lt_sand, drk_sand, shell, stone, md_sand, a, b, c, A, B, 
     N[72:,:] = 22
     N[:,0] = 23
     
+    #up/down change in k
+    N[1:9,5:7] = 42
+    N[9:13,6:8] = 42
+    N[13:72,5:7] = 42
+    N[1:72,10:12] = 42
+    N[1:34,15:17] = 42
+    N[1:34,20:22] = 42
+    N[1:21,25:27] = 42
+    N[21:34,24:26] = 42
+    N[21:26,22:24] = 42
+    N[40:72,17:19] = 42
+    N[52:72,14:16] = 42
+    N[40:72,24:26] = 42
+    N[40:47,21:23] = 42
+    N[47:52,22:24] = 42
+    N[52:72,21:23] = 42
+    N[1:30,35:37] = 42
+    N[1:27,31:33] = 42
+    N[27:33,30:32] = 42
+    N[30:33,32:34] = 42
+    N[40:42,29:31] = 42
+    N[42:72,30:32] = 42
+    N[30:43,32:34] = 42
+    N[43:72,35:37] = 42
+    
+    #left/right change in k
+    N[32:34,11:33] = 49
+    N[39:41,11:33] = 49
+    N[29:31,33:36] = 49
+    N[42:44,33:36] = 49
+    N[51:53,15:18] = 49
+    N[52,23] = 49
+    N[46,23] = 49
+    N[26,22:24] = 49
+    N[20,22:25] = 49
+    
     #h values
     N[1,8] = 1
     N[2,20] = 1
@@ -152,6 +189,8 @@ def final(clay, black, lt_sand, drk_sand, shell, stone, md_sand, a, b, c, A, B, 
     N[71,3] = 1
     N[9:27,1] = 1
     N[46:65,1] = 1
+    
+    #no flux areas
     
     h = np.ones_like(N, dtype='float')*5
     h[1,8] = a
@@ -171,13 +210,16 @@ def final(clay, black, lt_sand, drk_sand, shell, stone, md_sand, a, b, c, A, B, 
     
     h, iters = FinDiff(h, N, 1, 1e-3)
     
-    plt.matshow(np.transpose(k), origin='lower')
-    plt.matshow(np.transpose(N),origin='lower')
-    #plt.matshow(np.transpose(h), origin='lower')
+    #plt.matshow(np.transpose(k), origin='lower')
+    #plt.matshow(np.transpose(N),origin='lower')
+    plt.matshow(np.transpose(h), origin='lower')
     
-    q = np.ones((Nx,Ny))
     q_x = np.zeros_like(h)
     q_y = np.zeros_like(h)
-    plt.quiver(np.transpose(q_x[::3,::3]), np.transpose(q_y[::3,::3]))
+    q_x[1:-1,:] = -k[1:-1,:] * (h[2:,:]-h[0:-2,:])/2/1
+    q_y[:,1:-1] = -k[:,1:-1] * (h[:,2:]-h[:,0:-2])/2/1
+    
+    plt.figure()
+    plt.quiver(np.transpose(q_x[::1,::1]), np.transpose(q_y[::1,::1]))
 
 final(0.01,0.8,0.1,0.2,0.7,1,0.4,10,10,10,10,10,10,10,10,10,10,10,10,10,10)

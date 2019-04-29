@@ -218,6 +218,12 @@ def final(clay, black, lt_sand, drk_sand, shell, stone, md_sand, a, b, c, A, B, 
     q_y = np.zeros_like(h)
     q_x[1:-1,:] = -k[1:-1,:] * (h[2:,:]-h[0:-2,:])/2/1
     q_y[:,1:-1] = -k[:,1:-1] * (h[:,2:]-h[:,0:-2])/2/1
+    q_x[0,:] = -k[0,:]*(h[1,:]-h[0,:])/delta
+    q_x[20,:] = -k[20,:]*(h[20,:]-h[19,:])/delta
+    q_x[41,:] = -k[41,:]*(h[41,:]-h[40,:])/delta
+    q_x[72,:] = -k[72,:]*(h[72,:]-h[71,:])/delta
+    q_y[20:41,20] = -k[20:41,20]*(h[20:41,20]-h[20:41,19])/delta
+    q_y[20:41,20] = -k[20:41,20]*(h[20:41,20]-h[20:41,20])/delta
     
     plt.figure()
     plt.quiver(np.transpose(q_x[::1,::1]), np.transpose(q_y[::1,::1]))

@@ -2,104 +2,182 @@ import numpy as np
 import matplotlib.pyplot as plt
 from numba import jit
 
-Nx = 72
+Nx = 73
 Ny = 42
 
-def h_new(h, Node, delta, k, flux_x, flux_y, i, j):
-    if Node == 0:
-        # interior cell
-        h_n = (h[i+1,j] + h[i-1,j] + h[i,j-1] + h[i,j+1])/4
-    elif Node == 1:
-        # fixed value (Dirichlet)
-        h_n = h[i,j]
-    elif Node == 21:
-        # no flux left
-        h_n = (2*h[i+1,j] + h[i,j+1] + h[i,j-1])/4
-    elif Node == 22:
-        # no flux right
-        h_n = (2*h[i-1,j] + h[i,j+1] + h[i,j-1])/4
-    elif Node == 23:
-        # no flux bottom
-        h_n = (h[i+1,j] + h[i-1,j] + 2*h[i,j+1])/4
-    elif Node == 24:
-        # no flux top
-        h_n = (h[i+1,j] + h[i-1,j] + 2*h[i,j-1])/4
-    elif Node == 30:
-        # no flux corner, interior
-        h_n = (h[i-1,j] + h[i,j-1])/2
-    elif Node == 31:
-        # no flux corner, lower left outside
-        h_n = (h[i+1,j] + h[i,j+1])/2
-    elif Node == 32:
-        # no flux corner, upper left outside
-        h_n = (h[i+1,j] + h[i,j-1])/2
-    elif Node == 33:
-        #no flux corner, upper right outside
-        h_n = (h[i-1,j] + h[i,j-1])/2
-    elif Node == 34:
-        # no flux corner, lower right outside
-        h_n = (h[i-1,j] + h[i,j+1])/2
-    elif Node == 41:
-        # left/right change in k
-        h_avg = (k[i+1,j]*h[i+1,j] + k[i-1,j]*h[i-1,j]) / (k[i+1,j] + k[i-1,j])
-        h_n = (2*h_avg + h[i,j+1] + h[i,j-1])/4
-    elif Node == 42:
-        # top/bottom change in k
-        h_avg = (k[i,j+1]*h[i,j+1] + k[i,j-1]*h[i,j-1]) / (k[i,j+1] + k[i,j-1])
-        h_n = (2*h_avg + h[i+1,j] + h[i-1,j]) / 4
-    elif Node == 51:
-        # fixed flux from left to right
-        h_n = (2*h[i+1,j] + 2*delta*(-flux_x[i,j]/k[i,j]) + h[i,j+1] + h[i,j-1]) / 4
-    elif Node == 52:
-        # fixed flux from right to left
-        h_n = (2*h[i-1,j] + 2*delta*(-flux_x[i,j]/k[i,j]) + h[i,j+1] + h[i,j-1]) / 4
-    elif Node == 53:
-        # fixed flux from top to bottom
-        h_n = (h[i-1,j] + h[i+1,j] + 2*h[i,j-1] + 2*delta*(-flux_y[i,j]/k[i,j])) / 4
-    elif Node == 54:
-        h_n = (h[i-1,j] + h[i+1,j] + 2*h[i,j+1] + 2*delta*(-flux_y[i,j]/k[i,j])) / 4
-    else:
-        h_n = -99
-    return h_n
+def final(clay, black, lt_sand, drk_sand, shell, stone, md_sand, a, b, c, A, B, C, D, E, F, G, H, d, e, f):
+    def h_new(h, Node, delta, k, flux_x, flux_y, i, j):
+        if Node == 0:
+            # interior cell
+            h_n = (h[i+1,j] + h[i-1,j] + h[i,j-1] + h[i,j+1])/4
+        elif Node == 1:
+            # fixed value (Dirichlet)
+            h_n = h[i,j]
+        elif Node == 21:
+            # no flux left
+            h_n = (2*h[i+1,j] + h[i,j+1] + h[i,j-1])/4
+        elif Node == 22:
+            # no flux right
+            h_n = (2*h[i-1,j] + h[i,j+1] + h[i,j-1])/4
+        elif Node == 23:
+            # no flux bottom
+            h_n = (h[i+1,j] + h[i-1,j] + 2*h[i,j+1])/4
+        elif Node == 24:
+            # no flux top
+            h_n = (h[i+1,j] + h[i-1,j] + 2*h[i,j-1])/4
+        elif Node == 30:
+            # no flux corner, interior
+            h_n = (h[i-1,j] + h[i,j-1])/2
+        elif Node == 31:
+            # no flux corner, lower left outside
+            h_n = (h[i+1,j] + h[i,j+1])/2
+        elif Node == 32:
+            # no flux corner, upper left outside
+            h_n = (h[i+1,j] + h[i,j-1])/2
+        elif Node == 33:
+            #no flux corner, upper right outside
+            h_n = (h[i-1,j] + h[i,j-1])/2
+        elif Node == 34:
+            # no flux corner, lower right outside
+            h_n = (h[i-1,j] + h[i,j+1])/2
+        elif Node == 41:
+            # left/right change in k
+            h_avg = (k[i+1,j]*h[i+1,j] + k[i-1,j]*h[i-1,j]) / (k[i+1,j] + k[i-1,j])
+            h_n = (2*h_avg + h[i,j+1] + h[i,j-1])/4
+        elif Node == 42:
+            # top/bottom change in k
+            h_avg = (k[i,j+1]*h[i,j+1] + k[i,j-1]*h[i,j-1]) / (k[i,j+1] + k[i,j-1])
+            h_n = (2*h_avg + h[i+1,j] + h[i-1,j]) / 4
+        elif Node == 51:
+            # fixed flux from left to right
+            h_n = (2*h[i+1,j] + 2*delta*(-flux_x[i,j]/k[i,j]) + h[i,j+1] + h[i,j-1]) / 4
+        elif Node == 52:
+            # fixed flux from right to left
+            h_n = (2*h[i-1,j] + 2*delta*(-flux_x[i,j]/k[i,j]) + h[i,j+1] + h[i,j-1]) / 4
+        elif Node == 53:
+            # fixed flux from top to bottom
+            h_n = (h[i-1,j] + h[i+1,j] + 2*h[i,j-1] + 2*delta*(-flux_y[i,j]/k[i,j])) / 4
+        elif Node == 54:
+            h_n = (h[i-1,j] + h[i+1,j] + 2*h[i,j+1] + 2*delta*(-flux_y[i,j]/k[i,j])) / 4
+        else:
+            h_n = -99
+        return h_n
 
-# delta is the length of each node
-# node coordinates start at 0, and Nx/Ny ranges are all +1
+    # delta is the length of each node
+    # node coordinates start at 0, and Nx/Ny ranges are all +1
+    
+    k = np.ones((Nx, Ny))*drk_sand
+    
+    #light sand band
+    k[0:9,6:11] = lt_sand
+    k[9:13,7:11] = lt_sand
+    k[13:65,6:11] = lt_sand
+    k[65,10] = lt_sand
+    k[65:73,6:11] = lt_sand
+    k[0:21, 21:26] = lt_sand
+    k[24:27, 20:24] = lt_sand
+    k[50:73, 15:18] = lt_sand
+    k[21:33, 21:25] = lt_sand
+    k[0:30, 32:36] = lt_sand #topleft
+    k[27:33, 31:33] = lt_sand
+    k[40:46, 31:33] = lt_sand #topright
+    k[40:42, 30:31] = lt_sand
+    k[43:73, 31:36] = lt_sand 
+    
+    #black area
+    k[33:40, 11:33] = black
 
-k = np.ones((Nx, Ny))*10**-1
-k[9:11, 4] = 10**-5
-k[9:11, 5] = 10**-5
-#set new value for k in range where different
+    #gravel
+    k[40:52, 11:18] = stone
+    k[50:73, 11:15] = stone
 
-# delta is the length of each node
-# node coordinates start at 0, and Nx/Ny ranges are all +1
+   #shell
+    k[0:33, 11:16] = shell
+    k[40:47, 22:25] = shell
+    k[52:73, 22:25] = shell
 
-k = np.ones((Nx, Ny))*10**-1
-k[9:11, 4] = 10**-5
-k[9:11, 5] = 10**-5
-#set new value for k in range where different
+    # medium sand
+    k[0:33, 16:21] = md_sand #left
+    k[0:73, 36:42] = md_sand #top
+    k[30:43, 33:36] = md_sand
+    k[40:73, 25:30] = md_sand
+    k[42:73, 30:31] = md_sand
+    #clay pockets
+    k[21:26,23:25] = clay
+    k[47:52,23:25] = clay
+    
+    #flux as an array of 0
+    flux_x = np.ones((Nx, Ny))
+    flux_x[0,:] = 5
+    
+    flux_y = np.ones((Nx, Ny))
+    flux_y[0,:] = 5
+    #same for flux_y if on a top boundary
+    
+    @jit
+    def FinDiff(h, Node, delta, tol):
+        err = tol + 1
+        iters = 0
+        lam = 1.8
+        Nx, Ny = np.shape(h)
+        while err > tol and iters < 10000:
+            err = 0
+            iters += 1
+            for j in range(Ny-1):
+                for i in range(Nx-1):
+                    h_o = h[i,j]
+                    h_n = h_new(h, Node[i,j], delta, k, flux_x[i,j], flux_y[i,j], i, j)
+                    h_n = lam*h_n + (1-lam)*h_o
+                    err = max(err, abs(h_n-h_o))
+                    h[i,j] = h_n
+        return h, iters
+    
+    N = np.zeros((Nx, Ny), dtype=int)
+    N[0,:] = 21
+    N[72:,:] = 22
+    N[:,0] = 23
+    
+    #h values
+    N[1,8] = 1
+    N[2,20] = 1
+    N[3,35] = 1
+    N[12,10:12] = 1
+    N[18,19:21] = 1
+    N[24,32:34] = 1
+    N[48,32:34] = 1
+    N[55,19:21] = 1
+    N[61,11:13] = 1
+    N[69,34] = 1
+    N[70,17] = 1
+    N[71,3] = 1
+    N[9:27,1] = 1
+    N[46:65,1] = 1
+    
+    h = np.ones_like(N, dtype='float')*5
+    h[1,8] = a
+    h[2,20] = b
+    h[3,35] = c
+    h[12,10:12] = A
+    h[18,19:21] = B
+    h[24,32:34] = C
+    h[48,32:34] = D
+    h[55,19:21] = E
+    h[61,11:13] = F
+    h[69,34] = d
+    h[70,17] = e
+    h[71,3] = f
+    h[9:27,1] = G
+    h[46:65,1] = H
+    
+    h, iters = FinDiff(h, N, 1, 1e-3)
+    
+    plt.matshow(np.transpose(k), origin='lower')
+    plt.matshow(np.transpose(N),origin='lower')
+    #plt.matshow(np.transpose(h), origin='lower')
+    
+    q = np.ones((Nx,Ny))
+    q_x = np.zeros_like(h)
+    q_y = np.zeros_like(h)
+    plt.quiver(np.transpose(q_x[::3,::3]), np.transpose(q_y[::3,::3]))
 
-#flux as an array of 0
-flux_x = np.ones((Nx, Ny))
-flux_x[0,:] = 5
-
-flux_y = np.ones((Nx, Ny))
-flux_y[0,:] = 5
-#same for flux_y if on a top boundary
-
-@jit
-def FinDiff(h, Node, delta, tol):
-    err = tol + 1
-    iters = 0
-    lam = 1.8
-    Nx, Ny = np.shape(h)
-    while err > tol and iters < 10000:
-        err = 0
-        iters += 1
-        for j in range(Ny):
-            for i in range(Nx):
-                h_o = h[i,j]
-                h_n = h_new(h, Node[i,j], delta, k, flux_x[i,j], flux_y[i,j], i, j)
-                h_n = lam*h_n + (1-lam)*h_o
-                err = max(err, abs(h_n-h_o))
-                h[i,j] = h_n
-    return h, iters
+final(0.01,0.8,0.1,0.2,0.7,1,0.4,10,10,10,10,10,10,10,10,10,10,10,10,10,10)

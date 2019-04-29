@@ -108,6 +108,11 @@ def Groundwater_Display(clay, black, lt_sand, drk_sand, shell, stone, md_sand, a
     k[21:26,23:25] = clay
     k[47:52,23:25] = clay
     
+    #solid areas
+    k[21:27,21:23] = 0
+    k[47:53,21:23] = 0
+    k[33:41,9:11] = 0
+    
     #flux as an array of 0
     flux_x = np.ones((Nx, Ny))
     flux_x[0,:] = 5
@@ -191,20 +196,10 @@ def Groundwater_Display(clay, black, lt_sand, drk_sand, shell, stone, md_sand, a
     N[9:27,1] = 1
     N[46:65,1] = 1
     
-    #no flux areas
-    N[21,22] = 32
-    N[22:26,22] = 24
-    N[26,22] = 33
-    N[21,21] = 31
-    N[22:26,21] = 23
-    N[26,21] = 34
-    
-    N[47,22] = 32
-    N[48:52,22] = 24
-    N[52,22] = 33
-    N[47,21] = 31
-    N[48:52,21] = 23
-    N[52,21] = 34
+    #no flow areas
+    N[21:27,20:24] = 42
+    N[47:53,20:24] = 42
+    N[33:41,8:12] = 42
     
     h = np.ones_like(N, dtype='float')*5
     h[1,8] = a
@@ -224,8 +219,8 @@ def Groundwater_Display(clay, black, lt_sand, drk_sand, shell, stone, md_sand, a
     
     h, iters = FinDiff(h, N, 1, 1e-3)
     
-    #plt.matshow(np.transpose(k), origin='lower')
-    #plt.matshow(np.transpose(N),origin='lower')
+    plt.matshow(np.transpose(k), origin='lower')
+    plt.matshow(np.transpose(N),origin='lower')
     plt.matshow(np.transpose(h), origin='lower')
     
     q_x = np.zeros_like(h)
